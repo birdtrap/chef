@@ -45,10 +45,10 @@ systemd_unit 'jboss.service' do
   [Service]
   Type=forking
 
- User=jboss
+  User=jboss
   Group=jboss
-  ExecStart=/bin/bash -c 'nohup /opt/jboss/bin/run.sh -b  #{node[:network][:interfaces][:enp0s8][:addresses].detect{|k,v| v[:family] == "inet" }.first} &'
-  ExecStop=/bin/bash -c 'bin/shutdown.sh -s #{node[:network][:interfaces][:enp0s8][:addresses].detect{|k,v| v[:family] == "inet" }.first} -u admin'
+  ExecStart=/bin/bash -c 'nohup /opt/jboss/bin/run.sh -b 192.168.56.112 &'
+  ExecStop=/bin/bash -c 'bin/shutdown.sh -s 192.168.56.112 -u admin'
   TimeoutStartSec=300
   TimeoutStopSec=600
   SuccessExitStatus=143
@@ -58,16 +58,6 @@ systemd_unit 'jboss.service' do
   EOU
   action [ :create, :enable ]
 end
-
-data = data_bag_item('port_conf','jb_port')
-template '/opt/jboss/server/default/deploy/jbossweb.sar/server.xml' do
-  source "server.xml.erb"
-  owner 'jboss'
-  group 'jboss'
-  variables( ppport: data['port'])
-  mode 0644
-end
-
 
 remote_file '/opt/jboss/server/default/deploy/sample.war' do
   source 'https://tomcat.apache.org/tomcat-7.0-doc/appdev/sample/sample.war'
